@@ -12,3 +12,62 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Status{
+  ACTIVE
+  IN_ACTIVE
+}
+
+enum Priority{
+  URGENT
+  HIGH_PRIORITY
+  NORMAL
+  LOW
+}
+
+model Categories{
+  id Int @id @default(autoincrement())
+  uid String @unique
+  slug String @unique
+  name String
+  status Status
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Tasks Tasks[]
+
+  @@map("categories")
+}
+
+model Tags{
+  id Int @id @default(autoincrement())
+  uid String @unique
+  slug String @unique
+  name String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  Tasks Tasks[] @relation("TaskTags")
+
+  @@map("tags")
+}
+
+model Tasks{
+  id Int @id @default(autoincrement())
+  uid String @unique
+  slug String @unique
+  title String
+  description String?
+  dueDate DateTime @map("due_date")
+  priority Priority
+  status Status
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  categoryId Int @map("category_id")
+  category Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  Tags Tags[] @relation("TaskTags")
+
+  @@map("tasks")
+}
+
