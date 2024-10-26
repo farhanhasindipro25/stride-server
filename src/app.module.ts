@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from './prisma/prisma.module';
-import { TagsModule } from './tags/tags.module';
+import { PrismaModule } from './shared/prisma/prisma.module';
 import { TasksModule } from './tasks/tasks.module';
+import { TagsModule } from './tags/tags.module';
 import { CategoriesModule } from './categories/categories.module';
 
 @Module({
