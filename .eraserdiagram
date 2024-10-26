@@ -1,0 +1,38 @@
+tasks [icon: gcp-cloud-tasks, color: blue] {
+  id string pk
+  uid string
+  slug string
+  title string
+  description string
+  dueDate string
+  priority string
+  status string
+  categoryId string
+  tagId string
+}
+
+categories [icon: cube, color: blue] {
+  id string pk
+  uid string
+  slug string
+  name string
+  status string
+}
+
+tags [icon: tag, color: blue] {
+  id string pk
+  uid string
+  slug string
+  name string
+}
+
+taskTags [icon: activity, color:blue]{
+  id string
+  tagId string
+  taskId string
+}
+
+categories.id < tasks.id
+tags.id <> tasks.id
+taskTags <> tasks.id
+taskTags <> tags.id
