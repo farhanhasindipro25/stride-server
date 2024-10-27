@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskDto } from './tasks.dto';
 import { Response } from 'express';
@@ -33,6 +33,13 @@ export class TasksController {
   @Patch(':uid')
   async updateTask(@Param('uid') uid: string, @Body() data: UpdateTaskDto, @Res() res: Response){
     const result: Result = await this.tasksService.updateTask(uid, data)
+
+    return res.status(result.status).json(result)
+  }
+
+  @Delete('/delete/:uid')
+  async deleteTask(@Param('uid') uid: string, @Res() res: Response){
+    const result: Result = await this.tasksService.deleteTask(uid)
 
     return res.status(result.status).json(result)
   }

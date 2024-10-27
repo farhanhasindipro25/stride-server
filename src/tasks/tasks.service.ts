@@ -130,4 +130,37 @@ export class TasksService {
       }
     }
   }
+
+  async deleteTask(uid: string): Promise<Result> {
+    try {
+      const task = await this.prisma.tasks.findUnique({
+        where: { uid }
+      })
+      if (!task) {
+        return {
+          status: 404,
+          message: "Task not found",
+          context:'TasksService - deleteTask',
+        }
+      }
+
+      const deletedTask = await this.prisma.tasks.delete({
+        where: { uid }
+      })
+
+      return {
+        status: 200,
+        message: "Task deleted successfully",
+        context:'TasksService - deleteTask',
+        data: deletedTask
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context:'TasksService - deleteTask',
+        error: error.message
+      }
+    }
+  }
 }
