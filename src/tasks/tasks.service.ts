@@ -131,6 +131,42 @@ export class TasksService {
     }
   }
 
+  async markAsComplete(uid: string, completionStatus: boolean): Promise<Result> {
+    try {
+      const task = await this.prisma.tasks.findUnique({
+        where: { uid }
+      });
+      if (!task) {
+        return {
+          status: 404,
+          message: "Task not found",
+          context: 'TasksService - updateCompletionStatus',
+        };
+      }
+
+      const updatedTask = await this.prisma.tasks.update({
+        where: { uid },
+        data: {
+          completionStatus:true,
+        },
+      });
+
+      return {
+        status: 200,
+        message: "Task completion status updated successfully",
+        context: 'TasksService - updateCompletionStatus',
+        data: updatedTask
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context: 'TasksService - updateCompletionStatus',
+        error: error.message
+      };
+    }
+  }
+
   async deleteTask(uid: string): Promise<Result> {
     try {
       const task = await this.prisma.tasks.findUnique({

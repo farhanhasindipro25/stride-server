@@ -37,6 +37,14 @@ export class TasksController {
     return res.status(result.status).json(result)
   }
 
+  @Patch(':uid/mark-complete')
+  async markAsComplete(
+    @Param('uid') uid: string,
+    @Body('completed') completionStatus: boolean,
+  ): Promise<Result> {
+    return this.tasksService.markAsComplete(uid, completionStatus);
+  }
+
   @Delete('/delete/:uid')
   async deleteTask(@Param('uid') uid: string, @Res() res: Response){
     const result: Result = await this.tasksService.deleteTask(uid)
