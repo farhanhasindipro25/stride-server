@@ -15,4 +15,11 @@ export class TagsController {
 
     return res.status(result.status).json(result)
   }
+
+  @Get()
+  async getTags(@Res() res: Response){
+    const result: Result = await this.tagsService.getTags()
+
+    return res.status(result.status).json(result)
+  }
 }

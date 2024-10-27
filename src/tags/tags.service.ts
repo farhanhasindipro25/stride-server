@@ -24,12 +24,33 @@ export class TagsService {
       return{
         status: 201,
         message:"Tag created successfully",
+        context:'TagsService - createTag',
         data: tag
       }
     } catch (error) {
       return{
         status: 500,
         message:"Internal Server Error",
+        context:'TagsService - createTag',
+        error: error.message
+      }
+    }
+  }
+
+  async getTags(): Promise<Result> {
+    try {
+      const tags = await this.prisma.tags.findMany()
+      return {
+        status: 200,
+        message: "Tags fetched successfully",
+        context:'TagsService - getTags',
+        data: tags
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context:'TagsService - getTags',
         error: error.message
       }
     }
