@@ -22,4 +22,11 @@ export class TagsController {
 
     return res.status(result.status).json(result)
   }
+
+  @Get(':uid')
+  async getTagByUID(@Param('uid') uid: string, @Res() res: Response){
+    const result: Result = await this.tagsService.getTagByUID(uid)
+
+    return res.status(result.status).json(result)
+  }
 }

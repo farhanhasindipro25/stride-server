@@ -55,4 +55,33 @@ export class TagsService {
       }
     }
   }
+
+  async getTagByUID(uid: string): Promise<Result> {
+    try {
+      const tag = await this.prisma.tags.findUnique({
+        where: { uid }
+      })
+      if (!tag) {
+        return {
+          status: 404,
+          message: "Tag not found",
+          context:'TagsService - getTagByUID',
+        }
+      }
+
+      return {
+        status: 200,
+        message: "Tag fetched successfully",
+        context:'TagsService - getTagByUID',
+        data: tag
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context:'TagsService - getTagByUID',
+        error: error.message
+      }
+    }
+  }
 }
