@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { Result } from 'src/_libs/interfaces/api-result.interface';
-import { CreateCategoryDto } from './categories.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './categories.dto';
 import { CategoriesService } from './categories.service';
 
 @Controller('categories')
@@ -25,6 +25,13 @@ export class CategoriesController {
   @Get(':uid')
   async getCategoryByUID(@Param('uid') uid: string, @Res() res: Response){
     const result: Result = await this.categoriesService.getCategoryByUID(uid)
+
+    return res.status(result.status).json(result)
+  }
+
+  @Patch(':uid')
+  async updateCategory(@Param('uid') uid: string, @Body() data: UpdateCategoryDto, @Res() res: Response){
+    const result: Result = await this.categoriesService.updateCategory(uid, data)
 
     return res.status(result.status).json(result)
   }

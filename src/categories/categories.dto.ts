@@ -5,3 +5,9 @@ export class CreateCategoryDto {
   @IsString()
   name: string;
 }
+
+export class UpdateCategoryDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+}
