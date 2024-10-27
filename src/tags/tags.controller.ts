@@ -29,4 +29,11 @@ export class TagsController {
 
     return res.status(result.status).json(result)
   }
+
+  @Patch(':uid')
+  async updateTag(@Param('uid') uid: string, @Body() data: UpdateTagDto, @Res() res: Response){
+    const result: Result = await this.tagsService.updateTag(uid, data)
+
+    return res.status(result.status).json(result)
+  }
 }

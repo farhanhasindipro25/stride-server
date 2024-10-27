@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
-import { CreateTagDto } from './tags.dto';
+import { CreateTagDto, UpdateTagDto } from './tags.dto';
 import { Result } from 'src/_libs/interfaces/api-result.interface';
 import generateSlug from 'src/_libs/utils/slugGenerator';
 import generateUID from 'src/_libs/utils/uidGenerators';
@@ -80,6 +80,43 @@ export class TagsService {
         status: 500,
         message: "Internal Server Error",
         context:'TagsService - getTagByUID',
+        error: error.message
+      }
+    }
+  }
+
+  async updateTag(uid: string, data: UpdateTagDto): Promise<Result> {
+    try {
+      const tag = await this.prisma.tags.findUnique({
+        where: { uid }
+      })
+      if (!tag) {
+        return {
+          status: 404,
+          message: "Tag not found",
+          context:'TagsService - updateTag',
+        }
+      }
+
+      const updatedTag = await this.prisma.tags.update({
+        where: { uid },
+        data: {
+          ...data,
+          slug: generateSlug(data.name)
+        }
+      })
+
+      return {
+        status: 200,
+        message: "Tag updated successfully",
+        context:'TagsService - updateTag',
+        data: updatedTag
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context:'TagsService - updateTag',
         error: error.message
       }
     }
