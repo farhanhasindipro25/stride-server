@@ -23,4 +23,8 @@ export class CategoriesService {
       data: categoryData,
     });
   }
+
+  async getCategories(): Promise<Categories[]>{
+    return this.prisma.categories.findMany()
+  }
 }
