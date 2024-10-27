@@ -55,12 +55,10 @@ model Tags{
 model Tasks{
   id Int @id @default(autoincrement())
   uid String @unique
-  slug String @unique
   title String
   description String?
   dueDate DateTime @map("due_date")
   priority Priority @default(NORMAL)
-  status Status @default(ACTIVE)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
