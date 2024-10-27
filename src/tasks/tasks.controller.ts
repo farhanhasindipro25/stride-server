@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Res } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, UpdateTaskDto } from './tasks.dto';
 import { Response } from 'express';
@@ -17,8 +17,8 @@ export class TasksController {
 
 
   @Get()
-  async getTasks(@Res() res: Response){
-    const result: Result = await this.tasksService.getTasks()
+  async getTasks(@Query() query: any,@Res() res: Response){
+    const result: Result = await this.tasksService.getTasks(query)
 
     return res.status(result.status).json(result)
   }

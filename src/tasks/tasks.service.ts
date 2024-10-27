@@ -40,9 +40,41 @@ export class TasksService {
     }
   }
 
-  async getTasks(): Promise<Result> {
+  async getTasks(query: any): Promise<Result> {
+    let filters: any = {}
+
+    if(query.completionStatus){
+      filters = {
+        ...filters,
+        completionStatus:{
+          equals: query.completionStatus
+        }
+      }
+    }
+    if(query.priority){
+      filters={
+        ...filters,
+        priority:{
+          equals: query.priority
+        }
+      }
+    }
+    if(query.categoryId){
+      filters={
+        ...filters,
+        categoryId:{
+          equals: query.categoryId
+        }
+      }
+    }
     try {
-      const tasks = await this.prisma.tasks.findMany()
+      const tasks = await this.prisma.tasks.findMany({
+        where: filters,
+        include: {
+          Tags: true,
+          categoryInfo:true
+        }
+      })
       return {
         status: 200,
         message: "Tasks fetched successfully",
