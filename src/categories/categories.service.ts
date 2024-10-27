@@ -40,10 +40,36 @@ export class CategoriesService {
   async getCategories(): Promise<Result> {
     try {
       const categories = await this.prisma.categories.findMany()
-      return{
+      return {
         status: 200,
-        message:"Categories fetched successfully",
+        message: "Categories fetched successfully",
         data: categories
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        error: error.message
+      }
+    }
+  }
+
+  async getCategoryByUID(uid:string): Promise<Result> {
+    try {
+      const category = await this.prisma.categories.findUnique({
+        where: { uid }
+      })
+      if (!category) {
+        return {
+          status: 404,
+          message: "Category not found"
+        }
+      }
+
+      return {
+        status: 200,
+        message: "Category fetched successfully",
+        data: category
       }
     } catch (error) {
       return {
