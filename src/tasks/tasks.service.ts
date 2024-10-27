@@ -58,4 +58,33 @@ export class TasksService {
       }
     }
   }
+
+  async getTaskByUID(uid: string): Promise<Result> {
+    try {
+      const task = await this.prisma.tasks.findUnique({
+        where: { uid }
+      })
+      if (!task) {
+        return {
+          status: 404,
+          message: "Task not found",
+          context:'TasksService - getTaskByUID',
+        }
+      }
+
+      return {
+        status: 200,
+        message: "Task fetched successfully",
+        context:'TasksService - getTaskByUID',
+        data: task
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context:'TasksService - getTaskByUID',
+        error: error.message
+      }
+    }
+  }
 }
