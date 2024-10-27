@@ -121,4 +121,37 @@ export class TagsService {
       }
     }
   }
+
+  async deleteTag(uid: string): Promise<Result> {
+    try {
+      const tag = await this.prisma.tags.findUnique({
+        where: { uid }
+      })
+      if (!tag) {
+        return {
+          status: 404,
+          message: "Tag not found",
+          context:'TagsService - deleteTag',
+        }
+      }
+
+      const deletedTag = await this.prisma.tags.delete({
+        where: { uid }
+      })
+
+      return {
+        status: 200,
+        message: "Tag deleted successfully",
+        context:'TagsService - deleteTag',
+        data: deletedTag
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context:'TagsService - deleteTag',
+        error: error.message
+      }
+    }
+  }
 }

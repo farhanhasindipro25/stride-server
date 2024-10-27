@@ -36,4 +36,11 @@ export class TagsController {
 
     return res.status(result.status).json(result)
   }
+
+  @Delete('/delete/:uid')
+  async deleteTag(@Param('uid') uid: string, @Res() res: Response){
+    const result: Result = await this.tagsService.deleteTag(uid)
+
+    return res.status(result.status).json(result)
+  }
 }
