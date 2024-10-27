@@ -31,6 +31,32 @@ export class CreateTaskDto {
   categoryId: number;
 
   @IsArray()
+  @IsNotEmpty()
+  Tags: number[];
+}
+
+
+export class UpdateTaskDto {
+  @IsNotEmpty()
+  @IsString()
+  title: string;
+
   @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsNotEmpty()
+  @IsDateString()
+  dueDate: string;
+
+  @IsEnum(Priority)
+  priority: Priority;
+
+  @IsNotEmpty()
+  @IsNumber()
+  categoryId: number;
+
+  @IsArray()
+  @IsNotEmpty()
   Tags: number[];
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Result } from 'src/_libs/interfaces/api-result.interface';
 import generateUID from 'src/_libs/utils/uidGenerators';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
-import { CreateTaskDto } from './tasks.dto';
+import { CreateTaskDto, UpdateTaskDto } from './tasks.dto';
 
 @Injectable()
 export class TasksService {
@@ -83,6 +83,49 @@ export class TasksService {
         status: 500,
         message: "Internal Server Error",
         context:'TasksService - getTaskByUID',
+        error: error.message
+      }
+    }
+  }
+
+  async updateTask(uid: string, data: UpdateTaskDto): Promise<Result> {
+    try {
+      const task = await this.prisma.tasks.findUnique({
+        where: { uid }
+      })
+      if (!task) {
+        return {
+          status: 404,
+          message: "Task not found",
+          context:'TasksService - updateTask',
+        }
+      }
+
+      const updatedTask = await this.prisma.tasks.update({
+        where: { uid },
+        data: {
+          ...data,
+          dueDate: new Date(data.dueDate),
+          Tags: {
+            set: data.Tags?.map((id) => ({ id: id })),
+          },
+        },
+        include: {
+          Tags: true
+        }
+      })
+
+      return {
+        status: 200,
+        message: "Task updated successfully",
+        context:'TasksService - updateTask',
+        data: updatedTask
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        context:'TasksService - updateTask',
         error: error.message
       }
     }
