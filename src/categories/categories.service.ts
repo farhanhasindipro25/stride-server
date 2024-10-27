@@ -112,8 +112,35 @@ export class CategoriesService {
         error: error.message
       }
     }
-
-
   }
 
+  async deleteCategory(uid: string): Promise<Result> {
+    try {
+      const category = await this.prisma.categories.findUnique({
+        where: { uid }
+      })
+      if (!category) {
+        return {
+          status: 404,
+          message: "Category not found"
+        }
+      }
+
+      const deletedCategory = await this.prisma.categories.delete({
+        where: { uid }
+      })
+
+      return {
+        status: 200,
+        message: "Category deleted successfully",
+        data: deletedCategory
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message: "Internal Server Error",
+        error: error.message
+      }
+    }
+  }
 }
