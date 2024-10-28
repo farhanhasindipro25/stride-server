@@ -44,6 +44,7 @@ export class TagsService {
         status: 200,
         message: "Tags fetched successfully",
         context:'TagsService - getTags',
+        total:tags.length,
         data: tags
       }
     } catch (error) {

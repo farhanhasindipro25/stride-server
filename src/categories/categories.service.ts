@@ -7,7 +7,7 @@ import { CreateCategoryDto, UpdateCategoryDto } from './categories.dto';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async createCategory(data: CreateCategoryDto): Promise<Result> {
     try {
@@ -43,14 +43,15 @@ export class CategoriesService {
       return {
         status: 200,
         message: "Categories fetched successfully",
-        context:'CategoriesService - getCategories',
+        context: 'CategoriesService - getCategories',
+        total: categories.length,
         data: categories
       }
     } catch (error) {
       return {
         status: 500,
         message: "Internal Server Error",
-        context:'CategoriesService - getCategories',
+        context: 'CategoriesService - getCategories',
         error: error.message
       }
     }
@@ -65,21 +66,21 @@ export class CategoriesService {
         return {
           status: 404,
           message: "Category not found",
-          context:'CategoriesService - getCategoryByUID',
+          context: 'CategoriesService - getCategoryByUID',
         }
       }
 
       return {
         status: 200,
         message: "Category fetched successfully",
-        context:'CategoriesService - getCategoryByUID',
+        context: 'CategoriesService - getCategoryByUID',
         data: category
       }
     } catch (error) {
       return {
         status: 500,
         message: "Internal Server Error",
-        context:'CategoriesService - getCategoryByUID',
+        context: 'CategoriesService - getCategoryByUID',
         error: error.message
       }
     }
@@ -94,7 +95,7 @@ export class CategoriesService {
         return {
           status: 404,
           message: "Category not found",
-          context:'CategoriesService - updateCategory',
+          context: 'CategoriesService - updateCategory',
         }
       }
 
@@ -109,14 +110,14 @@ export class CategoriesService {
       return {
         status: 200,
         message: "Category updated successfully",
-        context:'CategoriesService - updateCategory',
+        context: 'CategoriesService - updateCategory',
         data: updatedCategory
       }
     } catch (error) {
       return {
         status: 500,
         message: "Internal Server Error",
-        context:'CategoriesService - updateCategory',
+        context: 'CategoriesService - updateCategory',
         error: error.message
       }
     }
@@ -131,7 +132,7 @@ export class CategoriesService {
         return {
           status: 404,
           message: "Category not found",
-          context:'CategoriesService - deleteCategory',
+          context: 'CategoriesService - deleteCategory',
         }
       }
 
@@ -142,14 +143,14 @@ export class CategoriesService {
       return {
         status: 200,
         message: "Category deleted successfully",
-        context:'CategoriesService - deleteCategory',
+        context: 'CategoriesService - deleteCategory',
         data: deletedCategory
       }
     } catch (error) {
       return {
         status: 500,
         message: "Internal Server Error",
-        context:'CategoriesService - deleteCategory',
+        context: 'CategoriesService - deleteCategory',
         error: error.message
       }
     }

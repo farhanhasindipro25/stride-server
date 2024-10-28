@@ -30,12 +30,12 @@ export class TasksController {
     return res.status(result.status).json(result)
   }
 
-  // @Patch(':uid')
-  // async updateTask(@Param('uid') uid: string, @Body() data: UpdateTaskDto, @Res() res: Response){
-  //   const result: Result = await this.tasksService.updateTask(uid, data)
+  @Patch(':uid')
+  async updateTask(@Param('uid') uid: string, @Body() data: UpdateTaskDto, @Res() res: Response){
+    const result: Result = await this.tasksService.updateTask(uid, data)
 
-  //   return res.status(result.status).json(result)
-  // }
+    return res.status(result.status).json(result)
+  }
 
   @Patch(':uid/mark-complete')
   async markAsComplete(

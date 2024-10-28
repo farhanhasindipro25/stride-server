@@ -54,33 +54,33 @@ export class TasksService {
   }
 
   async getTasks(query: any): Promise<Result> {
-    let filters: any = {};
+    try {
+      let filters: any = {};
 
-    if (query.completionStatus) {
-      filters = {
-        ...filters,
-        completionStatus: {
-          equals: query.completionStatus === 'true' ? true : false,
+      if (query.completionStatus) {
+        filters = {
+          ...filters,
+          completionStatus: {
+            equals: query.completionStatus === 'true' ? true : false,
+          }
         }
       }
-    }
-    if (query.priority) {
-      filters = {
-        ...filters,
-        priority: {
-          equals: query.priority,
-        },
-      };
-    }
-    if (query.categoryId) {
-      filters = {
-        ...filters,
-        categoryId: {
-          equals: Number(query.categoryId),
-        },
-      };
-    }
-    try {
+      if (query.priority) {
+        filters = {
+          ...filters,
+          priority: {
+            equals: query.priority,
+          },
+        };
+      }
+      if (query.categoryId) {
+        filters = {
+          ...filters,
+          categoryId: {
+            equals: Number(query.categoryId),
+          },
+        };
+      }
       const tasks = await this.prisma.tasks.findMany({
         where: { ...filters },
         include: {
@@ -100,6 +100,7 @@ export class TasksService {
         status: 200,
         message: 'Tasks fetched successfully',
         context: 'TasksService - getTasks',
+        total: tasks.length,
         data: tasks,
       };
     } catch (error) {
@@ -153,48 +154,76 @@ export class TasksService {
     }
   }
 
-  // async updateTask(uid: string, data: UpdateTaskDto): Promise<Result> {
-  //   try {
-  //     const task = await this.prisma.tasks.findUnique({
-  //       where: { uid },
-  //     });
-  //     if (!task) {
-  //       return {
-  //         status: 404,
-  //         message: 'Task not found',
-  //         context: 'TasksService - updateTask',
-  //       };
-  //     }
+  async updateTask(uid: string, data: UpdateTaskDto): Promise<Result> {
+    try {
+      const task = await this.prisma.tasks.findUnique({
+        where: { uid },
+      });
+      if (!task) {
+        return {
+          status: 404,
+          message: 'Task not found',
+          context: 'TasksService - updateTask',
+        };
+      }
 
-  //     const updatedTask = await this.prisma.tasks.update({
-  //       where: { uid },
-  //       data: {
-  //         ...data,
-  //         dueDate: new Date(data.dueDate),
-  //         Tags: {
-  //           set: data.Tags?.map((id) => ({ id: id })),
-  //         },
-  //       },
-  //       include: {
-  //         Tags: true,
-  //       },
-  //     });
+      const updatedTask = await this.prisma.tasks.update({
+        where: { uid },
+        data: {
+          title: data.title,
+          description: data.description,
+          dueDate: new Date(data.dueDate),
+          priority: data.priority,
+          categoryId: data.categoryId,
+        },
+        include: {
+          Tags: true,
+        },
+      });
 
-  //     return {
-  //       status: 200,
-  //       message: 'Task updated successfully',
-  //       context: 'TasksService - updateTask',
-  //       data: updatedTask,
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       status: 500,
-  //       message: 'Internal Server Error',
-  //       context: 'TasksService - updateTask',
-  //       error: error.message,
-  //     };
-  //   }
-  // }
+      if (data.Tags) {
+        await this.prisma.taskTags.deleteMany({
+          where: { taskId: updatedTask.id },
+        });
+
+        await this.prisma.taskTags.createMany({
+          data: data.Tags.map((tagId) => ({
+            taskId: updatedTask.id,
+            tagId,
+          })),
+        });
+      }
+      const finalUpdatedTask = await this.prisma.tasks.findUnique({
+        where: { uid: updatedTask.uid },
+        include: {
+          Tags: {
+            include: {
+              Tags: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+          categoryInfo: true,
+        },
+      });
+
+      return {
+        status: 200,
+        message: 'Task updated successfully',
+        context: 'TasksService - updateTask',
+        data: finalUpdatedTask,
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        message: 'Internal Server Error',
+        context: 'TasksService - updateTask',
+        error: error.message,
+      };
+    }
+  }
 
   async markAsComplete(
     uid: string,
@@ -250,6 +279,18 @@ export class TasksService {
 
       const deletedTask = await this.prisma.tasks.delete({
         where: { uid },
+        include: {
+          categoryInfo: true,
+          Tags: {
+            include: {
+              Tags: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          }
+        }
       });
 
       return {
