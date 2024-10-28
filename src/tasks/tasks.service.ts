@@ -6,7 +6,7 @@ import { CreateTaskDto, UpdateTaskDto } from './tasks.dto';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async createTask(data: CreateTaskDto): Promise<Result> {
     try {
@@ -18,7 +18,7 @@ export class TasksService {
           priority: data.priority,
           uid: generateUID(6),
           categoryId: data.categoryId,
-        }
+        },
       });
 
       if (data.Tags?.length) {
@@ -60,9 +60,9 @@ export class TasksService {
       filters = {
         ...filters,
         completionStatus: {
-          equals: query.completionStatus,
-        },
-      };
+          equals: query.completionStatus === 'true' ? true : false,
+        }
+      }
     }
     if (query.priority) {
       filters = {
@@ -82,6 +82,7 @@ export class TasksService {
     }
     try {
       const tasks = await this.prisma.tasks.findMany({
+        where: { ...filters },
         include: {
           categoryInfo: true,
           Tags: {
