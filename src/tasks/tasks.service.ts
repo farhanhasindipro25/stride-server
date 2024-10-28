@@ -6,172 +6,207 @@ import { CreateTaskDto, UpdateTaskDto } from './tasks.dto';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createTask(data: CreateTaskDto): Promise<Result> {
     try {
       const task = await this.prisma.tasks.create({
         data: {
-          ...data,
-          uid: generateUID(6),
+          title: data.title,
+          description: data.description,
           dueDate: new Date(data.dueDate),
-          Tags: {
-            connect: data.Tags?.map((id) => ({ id: id }))
-          }
-        },
-        include: {
-          Tags: true
+          priority: data.priority,
+          uid: generateUID(6),
+          categoryId: data.categoryId,
         }
-      })
+      });
+
+      if (data.Tags?.length) {
+        await this.prisma.taskTags.createMany({
+          data: data.Tags.map((tagId) => ({
+            taskId: task.id,
+            tagId: tagId,
+          })),
+        });
+      }
+
+      const createdTask = await this.prisma.tasks.findUnique({
+        where: { id: task.id },
+        include: {
+          Tags: true,
+        },
+      });
 
       return {
         status: 201,
-        message: "Task created successfully",
+        message: 'Task created successfully',
         context: 'TasksService - createTask',
-        data: task
-      }
+        data: createdTask,
+      };
     } catch (error) {
       return {
         status: 500,
-        message: "Internal Server Error",
+        message: 'Internal Server Error',
         context: 'TasksService - createTask',
-        error: error.message
-      }
+        error: error.message,
+      };
     }
   }
 
   async getTasks(query: any): Promise<Result> {
-    let filters: any = {}
+    let filters: any = {};
 
-    if(query.completionStatus){
+    if (query.completionStatus) {
       filters = {
         ...filters,
-        completionStatus:{
-          equals: query.completionStatus
-        }
-      }
+        completionStatus: {
+          equals: query.completionStatus,
+        },
+      };
     }
-    if(query.priority){
-      filters={
+    if (query.priority) {
+      filters = {
         ...filters,
-        priority:{
-          equals: query.priority
-        }
-      }
+        priority: {
+          equals: query.priority,
+        },
+      };
     }
-    if(query.categoryId){
-      filters={
+    if (query.categoryId) {
+      filters = {
         ...filters,
-        categoryId:{
-          equals: query.categoryId
-        }
-      }
+        categoryId: {
+          equals: query.categoryId,
+        },
+      };
     }
     try {
       const tasks = await this.prisma.tasks.findMany({
-        where: filters,
         include: {
-          Tags: true,
-          categoryInfo:true
-        }
-      })
+          categoryInfo: true,
+          Tags: {
+            include: {
+              Tags: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
       return {
         status: 200,
-        message: "Tasks fetched successfully",
-        context:'TasksService - getTasks',
-        data: tasks
-      }
+        message: 'Tasks fetched successfully',
+        context: 'TasksService - getTasks',
+        data: tasks,
+      };
     } catch (error) {
       return {
         status: 500,
-        message: "Internal Server Error",
-        context:'TasksService - getTasks',
-        error: error.message
-      }
+        message: 'Internal Server Error',
+        context: 'TasksService - getTasks',
+        error: error.message,
+      };
     }
   }
 
   async getTaskByUID(uid: string): Promise<Result> {
     try {
       const task = await this.prisma.tasks.findUnique({
-        where: { uid }
-      })
-      if (!task) {
-        return {
-          status: 404,
-          message: "Task not found",
-          context:'TasksService - getTaskByUID',
-        }
-      }
-
-      return {
-        status: 200,
-        message: "Task fetched successfully",
-        context:'TasksService - getTaskByUID',
-        data: task
-      }
-    } catch (error) {
-      return {
-        status: 500,
-        message: "Internal Server Error",
-        context:'TasksService - getTaskByUID',
-        error: error.message
-      }
-    }
-  }
-
-  async updateTask(uid: string, data: UpdateTaskDto): Promise<Result> {
-    try {
-      const task = await this.prisma.tasks.findUnique({
-        where: { uid }
-      })
-      if (!task) {
-        return {
-          status: 404,
-          message: "Task not found",
-          context:'TasksService - updateTask',
-        }
-      }
-
-      const updatedTask = await this.prisma.tasks.update({
         where: { uid },
-        data: {
-          ...data,
-          dueDate: new Date(data.dueDate),
+        include: {
+          categoryInfo: true,
           Tags: {
-            set: data.Tags?.map((id) => ({ id: id })),
+            include: {
+              Tags: {
+                select: {
+                  name: true,
+                },
+              },
+            },
           },
         },
-        include: {
-          Tags: true
-        }
-      })
-
-      return {
-        status: 200,
-        message: "Task updated successfully",
-        context:'TasksService - updateTask',
-        data: updatedTask
-      }
-    } catch (error) {
-      return {
-        status: 500,
-        message: "Internal Server Error",
-        context:'TasksService - updateTask',
-        error: error.message
-      }
-    }
-  }
-
-  async markAsComplete(uid: string, completionStatus: boolean): Promise<Result> {
-    try {
-      const task = await this.prisma.tasks.findUnique({
-        where: { uid }
       });
       if (!task) {
         return {
           status: 404,
-          message: "Task not found",
+          message: 'Task not found',
+          context: 'TasksService - getTaskByUID',
+        };
+      }
+
+      return {
+        status: 200,
+        message: 'Task fetched successfully',
+        context: 'TasksService - getTaskByUID',
+        data: task,
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        message: 'Internal Server Error',
+        context: 'TasksService - getTaskByUID',
+        error: error.message,
+      };
+    }
+  }
+
+  // async updateTask(uid: string, data: UpdateTaskDto): Promise<Result> {
+  //   try {
+  //     const task = await this.prisma.tasks.findUnique({
+  //       where: { uid },
+  //     });
+  //     if (!task) {
+  //       return {
+  //         status: 404,
+  //         message: 'Task not found',
+  //         context: 'TasksService - updateTask',
+  //       };
+  //     }
+
+  //     const updatedTask = await this.prisma.tasks.update({
+  //       where: { uid },
+  //       data: {
+  //         ...data,
+  //         dueDate: new Date(data.dueDate),
+  //         Tags: {
+  //           set: data.Tags?.map((id) => ({ id: id })),
+  //         },
+  //       },
+  //       include: {
+  //         Tags: true,
+  //       },
+  //     });
+
+  //     return {
+  //       status: 200,
+  //       message: 'Task updated successfully',
+  //       context: 'TasksService - updateTask',
+  //       data: updatedTask,
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       status: 500,
+  //       message: 'Internal Server Error',
+  //       context: 'TasksService - updateTask',
+  //       error: error.message,
+  //     };
+  //   }
+  // }
+
+  async markAsComplete(
+    uid: string,
+    completionStatus: boolean,
+  ): Promise<Result> {
+    try {
+      const task = await this.prisma.tasks.findUnique({
+        where: { uid },
+      });
+      if (!task) {
+        return {
+          status: 404,
+          message: 'Task not found',
           context: 'TasksService - updateCompletionStatus',
         };
       }
@@ -179,22 +214,22 @@ export class TasksService {
       const updatedTask = await this.prisma.tasks.update({
         where: { uid },
         data: {
-          completionStatus:true,
+          completionStatus: true,
         },
       });
 
       return {
         status: 200,
-        message: "Task completion status updated successfully",
+        message: 'Task completion status updated successfully',
         context: 'TasksService - updateCompletionStatus',
-        data: updatedTask
+        data: updatedTask,
       };
     } catch (error) {
       return {
         status: 500,
-        message: "Internal Server Error",
+        message: 'Internal Server Error',
         context: 'TasksService - updateCompletionStatus',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -202,33 +237,33 @@ export class TasksService {
   async deleteTask(uid: string): Promise<Result> {
     try {
       const task = await this.prisma.tasks.findUnique({
-        where: { uid }
-      })
+        where: { uid },
+      });
       if (!task) {
         return {
           status: 404,
-          message: "Task not found",
-          context:'TasksService - deleteTask',
-        }
+          message: 'Task not found',
+          context: 'TasksService - deleteTask',
+        };
       }
 
       const deletedTask = await this.prisma.tasks.delete({
-        where: { uid }
-      })
+        where: { uid },
+      });
 
       return {
         status: 200,
-        message: "Task deleted successfully",
-        context:'TasksService - deleteTask',
-        data: deletedTask
-      }
+        message: 'Task deleted successfully',
+        context: 'TasksService - deleteTask',
+        data: deletedTask,
+      };
     } catch (error) {
       return {
         status: 500,
-        message: "Internal Server Error",
-        context:'TasksService - deleteTask',
-        error: error.message
-      }
+        message: 'Internal Server Error',
+        context: 'TasksService - deleteTask',
+        error: error.message,
+      };
     }
   }
 }

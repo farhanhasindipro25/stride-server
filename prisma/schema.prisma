@@ -13,59 +13,70 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Status{
+enum Status {
   ACTIVE
   IN_ACTIVE
 }
 
-enum Priority{
+enum Priority {
   URGENT
   HIGH_PRIORITY
   NORMAL
   LOW
 }
 
-model Categories{
-  id Int @id @default(autoincrement())
-  uid String @unique
-  slug String @unique
-  name String
+model Categories {
+  id     Int    @id @default(autoincrement())
+  uid    String @unique
+  slug   String @unique
+  name   String
   status Status @default(ACTIVE)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  Tasks Tasks[]
+  Tasks     Tasks[]
 
   @@map("categories")
 }
 
-model Tags{
-  id Int @id @default(autoincrement())
-  uid String @unique
+model Tags {
+  id   Int    @id @default(autoincrement())
+  uid  String @unique
   slug String @unique
   name String
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  Tasks Tasks[] @relation("TaskTags")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  Tasks     TaskTags[]
 
   @@map("tags")
 }
 
-model Tasks{
-  id Int @id @default(autoincrement())
-  uid String @unique
-  title String
-  description String?
-  dueDate DateTime @map("due_date")
-  priority Priority @default(NORMAL)
-  completionStatus Boolean @default(false)
+model Tasks {
+  id               Int      @id @default(autoincrement())
+  uid              String   @unique
+  title            String
+  description      String?
+  dueDate          DateTime @map("due_date")
+  priority         Priority @default(NORMAL)
+  completionStatus Boolean  @default(false)
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  categoryId Int @map("category_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  categoryId   Int        @map("category_id")
   categoryInfo Categories @relation(fields: [categoryId], references: [id])
-  Tags Tags[] @relation("TaskTags")
+  Tags         TaskTags[]
 
   @@map("tasks")
+}
+
+model TaskTags {
+  taskId Int
+  tagId  Int
+
+  Tasks Tasks @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  Tags  Tags  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+  @@map("task_tags")
 }
