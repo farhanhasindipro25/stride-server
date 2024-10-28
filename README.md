@@ -1,8 +1,5 @@
 # Stride - A Personal Task Manager
 
-### TECHNOLOGIES USED
-
-
 ### ATTRACTIONS & ADVANCEMENTS
 
 - Precise documentation.
