@@ -76,7 +76,7 @@ export class TasksService {
       filters = {
         ...filters,
         categoryId: {
-          equals: query.categoryId,
+          equals: Number(query.categoryId),
         },
       };
     }
